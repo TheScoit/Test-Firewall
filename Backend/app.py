@@ -14,7 +14,7 @@ print("Server Started")
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins
+    allow_origins=["http://localhost:5173"],  # Allow all origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -242,7 +242,7 @@ async def predict_csv(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=f"Error reading CSV file: {str(e)}")
 
     # Preprocess the data
-    df = preprocess_features(df)
+    # df = preprocess_features(df) taaki wapas preprocess na kar sake
 
     # Make predictions
     predictions = make_predictions(df)
