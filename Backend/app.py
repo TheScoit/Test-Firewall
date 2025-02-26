@@ -87,16 +87,20 @@ def extract_features(packets):
 
         if packet.haslayer('TCP'):
             features['Source Port'] = packet['TCP'].sport
-            features['Destination Port'] = packet['TCP'].dport
+            features['Dst Port'] = packet['TCP'].dport
             features['Flags'] = str(packet['TCP'].flags)
+            # Count SYN flags
+            features['SYN Flag Cnt'] = 1 if 'S' in str(packet['TCP'].flags) else 0
         elif packet.haslayer('UDP'):
             features['Source Port'] = packet['UDP'].sport
-            features['Destination Port'] = packet['UDP'].dport
+            features['Dst Port'] = packet['UDP'].dport
             features['Flags'] = None
+            features['SYN Flag Cnt'] = 0  # No SYN flag in UDP
         else:
             features['Source Port'] = None
-            features['Destination Port'] = None
+            features['Dst Port'] = None
             features['Flags'] = None
+            features['SYN Flag Cnt'] = 0  # No SYN flag in non-TCP/UDP packets
 
         features['Packet Length'] = len(packet)
 
@@ -123,45 +127,52 @@ def extract_features(packets):
                 bwd_pkt_len_mean = flow['bwd_len'] / flow['bwd_pkts'] if flow['bwd_pkts'] > 0 else 0
 
                 features['Flow Duration'] = flow_duration
-                features['Flow Bytes/sec'] = flow_bytes_per_sec
-                features['Forward Packet Length Mean'] = fwd_pkt_len_mean
-                features['Backward Packet Length Mean'] = bwd_pkt_len_mean
-                features['Total Forward Packets'] = flow['fwd_pkts']
-                features['Total Backward Packets'] = flow['bwd_pkts']
+                features['Flow Byts/s'] = flow_bytes_per_sec
+                features['Fwd Pkt Len Mean'] = fwd_pkt_len_mean
+                features['Bwd Pkt Len Mean'] = bwd_pkt_len_mean
+                features['Tot Fwd Pkts'] = flow['fwd_pkts']
+                features['Tot Bwd Pkts'] = flow['bwd_pkts']
             else:
                 # Handle cases where start_time or end_time is None
                 features['Flow Duration'] = 0
-                features['Flow Bytes/sec'] = 0
-                features['Forward Packet Length Mean'] = 0
-                features['Backward Packet Length Mean'] = 0
-                features['Total Forward Packets'] = 0
-                features['Total Backward Packets'] = 0
+                features['Flow Byts/s'] = 0
+                features['Fwd Pkt Len Mean'] = 0
+                features['Bwd Pkt Len Mean'] = 0
+                features['Tot Fwd Pkts'] = 0
+                features['Tot Bwd Pkts'] = 0
 
         features_list.append(features)
     return features_list
 
 # Function to preprocess the extracted features
 def preprocess_features(df):
+    # Fill missing values
     df['Source IP'].ffill(inplace=True)
     df['Destination IP'].ffill(inplace=True)
     df['Protocol'].ffill(inplace=True)
     df['Source Port'].fillna(df['Source Port'].mean(), inplace=True)
-    df['Destination Port'].fillna(df['Source Port'].mean(), inplace=True)
-    df['Flow Bytes/sec'].fillna(df['Flow Bytes/sec'].mode()[0], inplace=True)
+    df['Dst Port'].fillna(df['Dst Port'].mean(), inplace=True)
+    df['Flow Byts/s'].fillna(df['Flow Byts/s'].mode()[0], inplace=True)
     df['Flow Duration'].fillna(df['Flow Duration'].mean(), inplace=True)
 
+    # Encode categorical features
     le = LabelEncoder()
     df["Flags"] = le.fit_transform(df["Flags"])
     df['Flags'].fillna(df['Flags'].mean(), inplace=True)
-    df['Forward Packet Length Mean'].fillna(df['Forward Packet Length Mean'].mean(), inplace=True)
-    df['Backward Packet Length Mean'].fillna(df['Backward Packet Length Mean'].mean(), inplace=True)
-    df['Total Forward Packets'].fillna(df['Total Forward Packets'].mode()[0], inplace=True)
-    df['Total Backward Packets'].fillna(df['Total Backward Packets'].mode()[0], inplace=True)
 
+    # Fill missing values for other columns
+    df['Fwd Pkt Len Mean'].fillna(df['Fwd Pkt Len Mean'].mean(), inplace=True)
+    df['Bwd Pkt Len Mean'].fillna(df['Bwd Pkt Len Mean'].mean(), inplace=True)
+    df['Tot Fwd Pkts'].fillna(df['Tot Fwd Pkts'].mode()[0], inplace=True)
+    df['Tot Bwd Pkts'].fillna(df['Tot Bwd Pkts'].mode()[0], inplace=True)
+    df['SYN Flag Cnt'].fillna(0, inplace=True)  # Fill missing SYN Flag Cnt with 0
+
+    # Select required columns
     required_columns = ["Dst Port", "Protocol", "Flow Duration", "Tot Fwd Pkts", "Tot Bwd Pkts", 
                         "Fwd Pkt Len Mean", "Bwd Pkt Len Mean", "Flow Byts/s", "SYN Flag Cnt"]
     df = df[required_columns]
 
+    # Normalize numerical features
     scaler = MinMaxScaler()
     df['Flow Byts/s'] = scaler.fit_transform(df[['Flow Byts/s']])
     df['Fwd Pkt Len Mean'] = scaler.fit_transform(df[['Fwd Pkt Len Mean']])
