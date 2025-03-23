@@ -1,65 +1,66 @@
 import { Lock, Mail, User2 } from "lucide-react";
 import Input from "../components/Input";
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
 
 const Register = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleRegister = (e) => {
     e.preventDefault();
   };
 
   return (
-    <div className="max-w-96 lg:max-w-sm rounded-2xl shadow-xl bg-gray-300 items-center flex w-full justify-center my-16 lg:mx-auto px-4 sm:px-6">
-      <div className="p-8 flex flex-col justify-center items-center">
-        <h2 className="lg:text-3xl font-bold mb-6 text-center text-black text-2xl">
+    <div className="w-full flex justify-center my-16 lg:my-14">
+      <div className="w-auto h-auto max-w-sm sm:max-w-sm lg:max-w-md bg-gray-300 rounded-xl shadow-lg px-4 sm:px-8 lg:px-10 py-4">
+        {/* Title */}
+        <h2 className="text-2xl sm:text-2xl font-bold text-center text-black mb-6">
           Create Account
         </h2>
-        <form onSubmit={handleRegister}>
-          <Input 
+
+        {/* Form */}
+        <form onSubmit={handleRegister} className="flex flex-col gap-4">
+          <Input
             icon={User2}
             type="text"
             placeholder="Full Name"
-            className="mb-4 text-gray-900 bg-black outline-none"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <Input 
+          <Input
             icon={Mail}
             type="email"
             placeholder="Email Address"
-            className="mb-4 text-gray-900 bg-black outline-none"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Input 
+          <Input
             icon={Lock}
             type="password"
             placeholder="Password"
-            className="mb-4 text-gray-900 bg-black outline-none"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {/* Password strength meter */}
+
+          {/* Password Strength Meter */}
           <PasswordStrengthMeter password={password} />
-          <button className="mt-5 mx-5 lg:mx-0 w-72 lg:w-full bg-black text-white p-3  rounded-md font-sans font-light hover:bg-gray-800 ">
+
+          {/* Register Button */}
+          <button className="w-full bg-black text-white p-3 rounded-md text-sm sm:text-base font-light hover:bg-gray-800 transition">
             Register
           </button>
         </form>
 
-        <div className="px-8 py-4 bg-opacity-50 mt-4 sm:mt-6">
-          <p className="text-white text-center text-sm sm:text-base">
-            Already have an account? 
-            <Link to="/login" className="text-black font-semibold hover:underline">
-              Login
-            </Link>
-          </p>
-        </div>
+        {/* Already have an account? */}
+        <p className="text-center text-sm sm:text-base mt-3 sm:mt-4 text-gray-700">
+          Already have an account?{" "}
+          <Link to="/login" className="text-black font-semibold hover:underline">
+            Login
+          </Link>
+        </p>
       </div>
     </div>
   );

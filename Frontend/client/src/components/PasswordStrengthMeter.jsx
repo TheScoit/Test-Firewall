@@ -10,7 +10,7 @@ const PasswordCriteria = ({ password }) => {
     ];
 
     return (
-        <div className="mt-2 space-y-1 ">
+        <div className="mt-2 space-y-1">
             {criteria.map((item) => (
                 <div key={item.label} className="flex items-center text-xs">
                     {item.met ? (
@@ -56,25 +56,29 @@ const PasswordStrengthMeter = ({ password }) => {
     };
 
     return (
-        <div className="mt-2 ">
-            <div className="flex justify-between items-center mb-1 px-5 lg:px-0">
+        <div className="mt-2 w-full max-w-md mx-auto">
+            <div className="flex justify-between items-center mb-1 px-4">
                 <span className="text-xs text-gray-400">Password Strength:</span>
-                <span className="text-xs font-medium ">{getStrengthText(strength)}</span>
+                <span className="text-xs font-medium">{getStrengthText(strength)}</span>
             </div>
 
-            {/* Strength Meter */}
-            <div className="flex space-x-1 mb-2 size-11/12 lg:size-full ">
+            {/* Responsive Strength Meter */}
+            <div className="flex justify-between space-x-1 mb-2 ">
                 {[...Array(4)].map((_, index) => (
                     <div
                         key={index}
-                        className={` h-1 w-20 rounded-full transition-colors duration-300 
-                        ${index < strength ? getColor(strength) : "bg-gray-900"}
+                        className={`h-1 rounded-md transition-colors duration-300 
+                        ${index < strength ? getColor(strength) : "bg-gray-400"}
                         `}
+                        style={{
+                            width: "24%", // Each bar takes 24% width for spacing
+                            minWidth: "20px", // Ensures visibility on very small screens
+                        }}
                     />
                 ))}
             </div>
 
-            {/* Password Criteria (Placed outside for better alignment) */}
+            {/* Password Criteria */}
             <PasswordCriteria password={password} />
         </div>
     );
